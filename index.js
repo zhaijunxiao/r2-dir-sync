@@ -26,6 +26,7 @@ try {
                 var stat = fs.statSync(filePath);
                 if (stat.isFile()) {
                     callback(filePath, stat);
+                    console.log(filePath);
                 } else if (stat.isDirectory()) {
                     walkSync(filePath, callback);
                 }
@@ -42,6 +43,7 @@ try {
                     console.log('Successfully uploaded '+ bucketPath +' to ' + bucketName);
                 }
             });
+            s3.
         });
     };
     
