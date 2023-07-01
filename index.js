@@ -25,8 +25,8 @@ try {
                 var filePath = path.join(currentDirPath, name);
                 var stat = fs.statSync(filePath);
                 if (stat.isFile()) {
-                    callback(filePath, stat);
                     console.log(filePath);
+                    callback(filePath, stat);
                 } else if (stat.isDirectory()) {
                     walkSync(filePath, callback);
                 }
