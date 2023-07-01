@@ -1,5 +1,5 @@
 name: "R2 Directory Synchronizer"
-description: "Synchronize you github directory to CloudFlare R2"
+description: "Synchronize your github directory to CloudFlare R2"
 branding:
   icon: "upload-cloud"
   color: "orange"
