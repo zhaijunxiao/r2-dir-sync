@@ -10,11 +10,6 @@
       "output_token": "nextToken",
       "limit_key": "maxResults"
     },
-    "ListIpAccessSettings": {
-      "input_token": "nextToken",
-      "output_token": "nextToken",
-      "limit_key": "maxResults"
-    },
     "ListNetworkSettings": {
       "input_token": "nextToken",
       "output_token": "nextToken",
@@ -31,11 +26,6 @@
       "limit_key": "maxResults"
     },
     "ListTrustStores": {
-      "input_token": "nextToken",
-      "output_token": "nextToken",
-      "limit_key": "maxResults"
-    },
-    "ListUserAccessLoggingSettings": {
       "input_token": "nextToken",
       "output_token": "nextToken",
       "limit_key": "maxResults"

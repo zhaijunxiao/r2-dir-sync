@@ -1,15 +1,5 @@
 {
   "pagination": {
-    "ExecuteQuery": {
-      "input_token": "nextToken",
-      "output_token": "nextToken",
-      "limit_key": "maxResults"
-    },
-    "GetPropertyValue": {
-      "input_token": "nextToken",
-      "output_token": "nextToken",
-      "limit_key": "maxResults"
-    },
     "GetPropertyValueHistory": {
       "input_token": "nextToken",
       "output_token": "nextToken",
@@ -26,16 +16,6 @@
       "limit_key": "maxResults"
     },
     "ListScenes": {
-      "input_token": "nextToken",
-      "output_token": "nextToken",
-      "limit_key": "maxResults"
-    },
-    "ListSyncJobs": {
-      "input_token": "nextToken",
-      "output_token": "nextToken",
-      "limit_key": "maxResults"
-    },
-    "ListSyncResources": {
       "input_token": "nextToken",
       "output_token": "nextToken",
       "limit_key": "maxResults"

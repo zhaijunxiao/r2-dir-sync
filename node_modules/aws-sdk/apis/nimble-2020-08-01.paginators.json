@@ -27,11 +27,6 @@
       "output_token": "nextToken",
       "result_key": "streamingImages"
     },
-    "ListStreamingSessionBackups": {
-      "input_token": "nextToken",
-      "output_token": "nextToken",
-      "result_key": "streamingSessionBackups"
-    },
     "ListStreamingSessions": {
       "input_token": "nextToken",
       "output_token": "nextToken",

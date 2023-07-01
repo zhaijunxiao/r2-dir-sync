@@ -19,7 +19,6 @@ function derivedKeys(service) {
     [region, '*'],
     [regionPrefix, '*'],
     ['*', endpointPrefix],
-    [region, 'internal-*'],
     ['*', '*']
   ].map(function(item) {
     return item[0] && item[1] ? item.join('/') : null;
@@ -64,21 +63,10 @@ function configureEndpoint(service) {
       }
 
       // signature version
-      if (!config.signatureVersion) {
-        // Note: config is a global object and should not be mutated here.
-        // However, we are retaining this line for backwards compatibility.
-        // The non-v4 signatureVersion will be set in a copied object below.
-        config.signatureVersion = 'v4';
-      }
-
-      var useBearer = (service.api && service.api.signatureVersion) === 'bearer';
+      if (!config.signatureVersion) config.signatureVersion = 'v4';
 
       // merge config
-      applyConfig(service, Object.assign(
-        {},
-        config,
-        { signatureVersion: useBearer ? 'bearer' : config.signatureVersion }
-      ));
+      applyConfig(service, config);
       return;
     }
   }

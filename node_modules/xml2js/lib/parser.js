@@ -35,7 +35,6 @@
     extend(Parser, superClass);
 
     function Parser(opts) {
-      this.parseStringPromise = bind(this.parseStringPromise, this);
       this.parseString = bind(this.parseString, this);
       this.reset = bind(this.reset, this);
       this.assignOrPush = bind(this.assignOrPush, this);
@@ -141,14 +140,14 @@
       this.saxParser.onopentag = (function(_this) {
         return function(node) {
           var key, newValue, obj, processedKey, ref;
-          obj = Object.create(null);
+          obj = {};
           obj[charkey] = "";
           if (!_this.options.ignoreAttrs) {
             ref = node.attributes;
             for (key in ref) {
               if (!hasProp.call(ref, key)) continue;
               if (!(attrkey in obj) && !_this.options.mergeAttrs) {
-                obj[attrkey] = Object.create(null);
+                obj[attrkey] = {};
               }
               newValue = _this.options.attrValueProcessors ? processItem(_this.options.attrValueProcessors, node.attributes[key], key) : node.attributes[key];
               processedKey = _this.options.attrNameProcessors ? processItem(_this.options.attrNameProcessors, key) : key;
@@ -198,11 +197,7 @@
             }
           }
           if (isEmpty(obj)) {
-            if (typeof _this.options.emptyTag === 'function') {
-              obj = _this.options.emptyTag();
-            } else {
-              obj = _this.options.emptyTag !== '' ? _this.options.emptyTag : emptyStr;
-            }
+            obj = _this.options.emptyTag !== '' ? _this.options.emptyTag : emptyStr;
           }
           if (_this.options.validator != null) {
             xpath = "/" + ((function() {
@@ -226,7 +221,7 @@
           }
           if (_this.options.explicitChildren && !_this.options.mergeAttrs && typeof obj === 'object') {
             if (!_this.options.preserveChildrenOrder) {
-              node = Object.create(null);
+              node = {};
               if (_this.options.attrkey in obj) {
                 node[_this.options.attrkey] = obj[_this.options.attrkey];
                 delete obj[_this.options.attrkey];
@@ -241,7 +236,7 @@
               obj = node;
             } else if (s) {
               s[_this.options.childkey] = s[_this.options.childkey] || [];
-              objClone = Object.create(null);
+              objClone = {};
               for (key in obj) {
                 if (!hasProp.call(obj, key)) continue;
                 objClone[key] = obj[key];
@@ -258,7 +253,7 @@
           } else {
             if (_this.options.explicitRoot) {
               old = obj;
-              obj = Object.create(null);
+              obj = {};
               obj[nodeName] = old;
             }
             _this.resultObject = obj;
@@ -336,23 +331,9 @@
       }
     };
 
-    Parser.prototype.parseStringPromise = function(str) {
-      return new Promise((function(_this) {
-        return function(resolve, reject) {
-          return _this.parseString(str, function(err, value) {
-            if (err) {
-              return reject(err);
-            } else {
-              return resolve(value);
-            }
-          });
-        };
-      })(this));
-    };
-
     return Parser;
 
-  })(events);
+  })(events.EventEmitter);
 
   exports.parseString = function(str, a, b) {
     var cb, options, parser;
@@ -371,15 +352,6 @@
     }
     parser = new exports.Parser(options);
     return parser.parseString(str, cb);
-  };
-
-  exports.parseStringPromise = function(str, a) {
-    var options, parser;
-    if (typeof a === 'object') {
-      options = a;
-    }
-    parser = new exports.Parser(options);
-    return parser.parseStringPromise(str);
   };
 
 }).call(this);

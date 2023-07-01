@@ -241,10 +241,6 @@ declare namespace AccessAnalyzer {
   export type AccessPointPolicy = string;
   export interface AccessPreview {
     /**
-     * The unique ID for the access preview.
-     */
-    id: AccessPreviewId;
-    /**
      * The ARN of the analyzer used to generate the access preview.
      */
     analyzerArn: AnalyzerArn;
@@ -257,6 +253,10 @@ declare namespace AccessAnalyzer {
      */
     createdAt: Timestamp;
     /**
+     * The unique ID for the access preview.
+     */
+    id: AccessPreviewId;
+    /**
      * The status of the access preview.    Creating - The access preview creation is in progress.    Completed - The access preview is complete. You can preview findings for external access to the resource.    Failed - The access preview creation has failed.  
      */
     status: AccessPreviewStatus;
@@ -267,9 +267,25 @@ declare namespace AccessAnalyzer {
   }
   export interface AccessPreviewFinding {
     /**
-     * The ID of the access preview finding. This ID uniquely identifies the element in the list of access preview findings and is not related to the finding ID in Access Analyzer.
+     * The action in the analyzed policy statement that an external principal has permission to perform.
      */
-    id: AccessPreviewFindingId;
+    action?: ActionList;
+    /**
+     * Provides context on how the access preview finding compares to existing access identified in IAM Access Analyzer.    New - The finding is for newly-introduced access.    Unchanged - The preview finding is an existing finding that would remain unchanged.    Changed - The preview finding is an existing finding with a change in status.   For example, a Changed finding with preview status Resolved and existing status Active indicates the existing Active finding would become Resolved as a result of the proposed permissions change.
+     */
+    changeType: FindingChangeType;
+    /**
+     * The condition in the analyzed policy statement that resulted in a finding.
+     */
+    condition?: ConditionKeyMap;
+    /**
+     * The time at which the access preview finding was created.
+     */
+    createdAt: Timestamp;
+    /**
+     * An error.
+     */
+    error?: String;
     /**
      * The existing ID of the finding in IAM Access Analyzer, provided only for existing findings.
      */
@@ -279,53 +295,37 @@ declare namespace AccessAnalyzer {
      */
     existingFindingStatus?: FindingStatus;
     /**
-     * The external principal that has access to a resource within the zone of trust.
+     * The ID of the access preview finding. This ID uniquely identifies the element in the list of access preview findings and is not related to the finding ID in Access Analyzer.
      */
-    principal?: PrincipalMap;
-    /**
-     * The action in the analyzed policy statement that an external principal has permission to perform.
-     */
-    action?: ActionList;
-    /**
-     * The condition in the analyzed policy statement that resulted in a finding.
-     */
-    condition?: ConditionKeyMap;
-    /**
-     * The resource that an external principal has access to. This is the resource associated with the access preview.
-     */
-    resource?: String;
+    id: AccessPreviewFindingId;
     /**
      * Indicates whether the policy that generated the finding allows public access to the resource.
      */
     isPublic?: Boolean;
     /**
-     * The type of the resource that can be accessed in the finding.
+     * The external principal that has access to a resource within the zone of trust.
      */
-    resourceType: ResourceType;
+    principal?: PrincipalMap;
     /**
-     * The time at which the access preview finding was created.
+     * The resource that an external principal has access to. This is the resource associated with the access preview.
      */
-    createdAt: Timestamp;
-    /**
-     * Provides context on how the access preview finding compares to existing access identified in IAM Access Analyzer.    New - The finding is for newly-introduced access.    Unchanged - The preview finding is an existing finding that would remain unchanged.    Changed - The preview finding is an existing finding with a change in status.   For example, a Changed finding with preview status Resolved and existing status Active indicates the existing Active finding would become Resolved as a result of the proposed permissions change.
-     */
-    changeType: FindingChangeType;
-    /**
-     * The preview status of the finding. This is what the status of the finding would be after permissions deployment. For example, a Changed finding with preview status Resolved and existing status Active indicates the existing Active finding would become Resolved as a result of the proposed permissions change.
-     */
-    status: FindingStatus;
+    resource?: String;
     /**
      * The Amazon Web Services account ID that owns the resource. For most Amazon Web Services resources, the owning account is the account in which the resource was created.
      */
     resourceOwnerAccount: String;
     /**
-     * An error.
+     * The type of the resource that can be accessed in the finding.
      */
-    error?: String;
+    resourceType: ResourceType;
     /**
      * The sources of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings.
      */
     sources?: FindingSourceList;
+    /**
+     * The preview status of the finding. This is what the status of the finding would be after permissions deployment. For example, a Changed finding with preview status Resolved and existing status Active indicates the existing Active finding would become Resolved as a result of the proposed permissions change.
+     */
+    status: FindingStatus;
   }
   export type AccessPreviewFindingId = string;
   export type AccessPreviewFindingsList = AccessPreviewFinding[];
@@ -340,10 +340,6 @@ declare namespace AccessAnalyzer {
   export type AccessPreviewStatusReasonCode = "INTERNAL_ERROR"|"INVALID_CONFIGURATION"|string;
   export interface AccessPreviewSummary {
     /**
-     * The unique ID for the access preview.
-     */
-    id: AccessPreviewId;
-    /**
      * The ARN of the analyzer used to generate the access preview.
      */
     analyzerArn: AnalyzerArn;
@@ -351,6 +347,10 @@ declare namespace AccessAnalyzer {
      * The time at which the access preview was created.
      */
     createdAt: Timestamp;
+    /**
+     * The unique ID for the access preview.
+     */
+    id: AccessPreviewId;
     /**
      * The status of the access preview.    Creating - The access preview creation is in progress.    Completed - The access preview is complete and previews the findings for external access to the resource.    Failed - The access preview creation has failed.  
      */
@@ -374,33 +374,37 @@ declare namespace AccessAnalyzer {
   export type ActionList = String[];
   export interface AnalyzedResource {
     /**
-     * The ARN of the resource that was analyzed.
+     * The actions that an external principal is granted permission to use by the policy that generated the finding.
      */
-    resourceArn: ResourceArn;
-    /**
-     * The type of the resource that was analyzed.
-     */
-    resourceType: ResourceType;
-    /**
-     * The time at which the finding was created.
-     */
-    createdAt: Timestamp;
+    actions?: ActionList;
     /**
      * The time at which the resource was analyzed.
      */
     analyzedAt: Timestamp;
     /**
-     * The time at which the finding was updated.
+     * The time at which the finding was created.
      */
-    updatedAt: Timestamp;
+    createdAt: Timestamp;
+    /**
+     * An error message.
+     */
+    error?: String;
     /**
      * Indicates whether the policy that generated the finding grants public access to the resource.
      */
     isPublic: Boolean;
     /**
-     * The actions that an external principal is granted permission to use by the policy that generated the finding.
+     * The ARN of the resource that was analyzed.
      */
-    actions?: ActionList;
+    resourceArn: ResourceArn;
+    /**
+     * The Amazon Web Services account ID that owns the resource.
+     */
+    resourceOwnerAccount: String;
+    /**
+     * The type of the resource that was analyzed.
+     */
+    resourceType: ResourceType;
     /**
      * Indicates how the access that generated the finding is granted. This is populated for Amazon S3 bucket findings.
      */
@@ -410,13 +414,9 @@ declare namespace AccessAnalyzer {
      */
     status?: FindingStatus;
     /**
-     * The Amazon Web Services account ID that owns the resource.
+     * The time at which the finding was updated.
      */
-    resourceOwnerAccount: String;
-    /**
-     * An error message.
-     */
-    error?: String;
+    updatedAt: Timestamp;
   }
   export interface AnalyzedResourceSummary {
     /**
@@ -441,14 +441,6 @@ declare namespace AccessAnalyzer {
      */
     arn: AnalyzerArn;
     /**
-     * The name of the analyzer.
-     */
-    name: Name;
-    /**
-     * The type of analyzer, which corresponds to the zone of trust chosen for the analyzer.
-     */
-    type: Type;
-    /**
      * A timestamp for the time at which the analyzer was created.
      */
     createdAt: Timestamp;
@@ -461,9 +453,9 @@ declare namespace AccessAnalyzer {
      */
     lastResourceAnalyzedAt?: Timestamp;
     /**
-     * The tags added to the analyzer.
+     * The name of the analyzer.
      */
-    tags?: TagsMap;
+    name: Name;
     /**
      * The status of the analyzer. An Active analyzer successfully monitors supported resources and generates new findings. The analyzer is Disabled when a user action, such as removing trusted access for Identity and Access Management Access Analyzer from Organizations, causes the analyzer to stop generating new findings. The status is Creating when the analyzer creation is in progress and Failed when the analyzer creation has failed. 
      */
@@ -472,6 +464,14 @@ declare namespace AccessAnalyzer {
      * The statusReason provides more details about the current status of the analyzer. For example, if the creation for the analyzer fails, a Failed status is returned. For an analyzer with organization as the type, this failure can be due to an issue with creating the service-linked roles required in the member accounts of the Amazon Web Services organization.
      */
     statusReason?: StatusReason;
+    /**
+     * The tags added to the analyzer.
+     */
+    tags?: TagsMap;
+    /**
+     * The type of analyzer, which corresponds to the zone of trust chosen for the analyzer.
+     */
+    type: Type;
   }
   export type AnalyzersList = AnalyzerSummary[];
   export interface ApplyArchiveRuleRequest {
@@ -480,27 +480,27 @@ declare namespace AccessAnalyzer {
      */
     analyzerArn: AnalyzerArn;
     /**
-     * The name of the rule to apply.
-     */
-    ruleName: Name;
-    /**
      * A client token.
      */
     clientToken?: String;
+    /**
+     * The name of the rule to apply.
+     */
+    ruleName: Name;
   }
   export interface ArchiveRuleSummary {
     /**
-     * The name of the archive rule.
+     * The time at which the archive rule was created.
      */
-    ruleName: Name;
+    createdAt: Timestamp;
     /**
      * A filter used to define the archive rule.
      */
     filter: FilterCriteriaMap;
     /**
-     * The time at which the archive rule was created.
+     * The name of the archive rule.
      */
-    createdAt: Timestamp;
+    ruleName: Name;
     /**
      * The time at which the archive rule was last updated.
      */
@@ -519,78 +519,54 @@ declare namespace AccessAnalyzer {
   export type CloudTrailArn = string;
   export interface CloudTrailDetails {
     /**
-     * A Trail object that contains settings for a trail.
-     */
-    trails: TrailList;
-    /**
      * The ARN of the service role that IAM Access Analyzer uses to access your CloudTrail trail and service last accessed information.
      */
     accessRole: RoleArn;
     /**
-     * The start of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp before this time are not considered to generate a policy.
-     */
-    startTime: Timestamp;
-    /**
      * The end of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp after this time are not considered to generate a policy. If this is not included in the request, the default value is the current time.
      */
     endTime?: Timestamp;
-  }
-  export interface CloudTrailProperties {
-    /**
-     * A TrailProperties object that contains settings for trail properties.
-     */
-    trailProperties: TrailPropertiesList;
     /**
      * The start of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp before this time are not considered to generate a policy.
      */
     startTime: Timestamp;
+    /**
+     * A Trail object that contains settings for a trail.
+     */
+    trails: TrailList;
+  }
+  export interface CloudTrailProperties {
     /**
      * The end of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp after this time are not considered to generate a policy. If this is not included in the request, the default value is the current time.
      */
     endTime: Timestamp;
+    /**
+     * The start of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp before this time are not considered to generate a policy.
+     */
+    startTime: Timestamp;
+    /**
+     * A TrailProperties object that contains settings for trail properties.
+     */
+    trailProperties: TrailPropertiesList;
   }
   export type ConditionKeyMap = {[key: string]: String};
   export interface Configuration {
-    /**
-     * The access control configuration is for an Amazon EBS volume snapshot.
-     */
-    ebsSnapshot?: EbsSnapshotConfiguration;
-    /**
-     * The access control configuration is for an Amazon ECR repository.
-     */
-    ecrRepository?: EcrRepositoryConfiguration;
     /**
      * The access control configuration is for an IAM role. 
      */
     iamRole?: IamRoleConfiguration;
     /**
-     * The access control configuration is for an Amazon EFS file system.
-     */
-    efsFileSystem?: EfsFileSystemConfiguration;
-    /**
      * The access control configuration is for a KMS key. 
      */
     kmsKey?: KmsKeyConfiguration;
-    /**
-     * The access control configuration is for an Amazon RDS DB cluster snapshot.
-     */
-    rdsDbClusterSnapshot?: RdsDbClusterSnapshotConfiguration;
-    /**
-     * The access control configuration is for an Amazon RDS DB snapshot.
-     */
-    rdsDbSnapshot?: RdsDbSnapshotConfiguration;
-    /**
-     * The access control configuration is for a Secrets Manager secret.
-     */
-    secretsManagerSecret?: SecretsManagerSecretConfiguration;
     /**
      * The access control configuration is for an Amazon S3 Bucket. 
      */
     s3Bucket?: S3BucketConfiguration;
     /**
-     * The access control configuration is for an Amazon SNS topic
+     * The access control configuration is for a Secrets Manager secret.
      */
-    snsTopic?: SnsTopicConfiguration;
+    secretsManagerSecret?: SecretsManagerSecretConfiguration;
     /**
      * The access control configuration is for an Amazon SQS queue. 
      */
@@ -604,13 +580,13 @@ declare namespace AccessAnalyzer {
      */
     analyzerArn: AnalyzerArn;
     /**
-     * Access control configuration for your resource that is used to generate the access preview. The access preview includes findings for external access allowed to the resource with the proposed access control configuration. The configuration must contain exactly one element.
-     */
-    configurations: ConfigurationsMap;
-    /**
      * A client token.
      */
     clientToken?: String;
+    /**
+     * Access control configuration for your resource that is used to generate the access preview. The access preview includes findings for external access allowed to the resource with the proposed access control configuration. The configuration must contain exactly one element.
+     */
+    configurations: ConfigurationsMap;
   }
   export interface CreateAccessPreviewResponse {
     /**
@@ -624,21 +600,21 @@ declare namespace AccessAnalyzer {
      */
     analyzerName: Name;
     /**
-     * The type of analyzer to create. Only ACCOUNT and ORGANIZATION analyzers are supported. You can create only one analyzer per account per Region. You can create up to 5 analyzers per organization per Region.
-     */
-    type: Type;
-    /**
      * Specifies the archive rules to add for the analyzer. Archive rules automatically archive findings that meet the criteria you define for the rule.
      */
     archiveRules?: InlineArchiveRulesList;
+    /**
+     * A client token.
+     */
+    clientToken?: String;
     /**
      * The tags to apply to the analyzer.
      */
     tags?: TagsMap;
     /**
-     * A client token.
+     * The type of analyzer to create. Only ACCOUNT and ORGANIZATION analyzers are supported. You can create only one analyzer per account per Region. You can create up to 5 analyzers per organization per Region.
      */
-    clientToken?: String;
+    type: Type;
   }
   export interface CreateAnalyzerResponse {
     /**
@@ -652,35 +628,35 @@ declare namespace AccessAnalyzer {
      */
     analyzerName: Name;
     /**
-     * The name of the rule to create.
+     * A client token.
      */
-    ruleName: Name;
+    clientToken?: String;
     /**
      * The criteria for the rule.
      */
     filter: FilterCriteriaMap;
     /**
-     * A client token.
+     * The name of the rule to create.
      */
-    clientToken?: String;
+    ruleName: Name;
   }
   export interface Criterion {
-    /**
-     * An "equals" operator to match for the filter used to create the rule.
-     */
-    eq?: ValueList;
-    /**
-     * A "not equals" operator to match for the filter used to create the rule.
-     */
-    neq?: ValueList;
     /**
      * A "contains" operator to match for the filter used to create the rule.
      */
     contains?: ValueList;
     /**
+     * An "equals" operator to match for the filter used to create the rule.
+     */
+    eq?: ValueList;
+    /**
      * An "exists" operator to match for the filter used to create the rule. 
      */
     exists?: Boolean;
+    /**
+     * A "not equals" operator to match for the filter used to create the rule.
+     */
+    neq?: ValueList;
   }
   export interface DeleteAnalyzerRequest {
     /**
@@ -698,73 +674,24 @@ declare namespace AccessAnalyzer {
      */
     analyzerName: Name;
     /**
-     * The name of the rule to delete.
-     */
-    ruleName: Name;
-    /**
      * A client token.
      */
     clientToken?: String;
+    /**
+     * The name of the rule to delete.
+     */
+    ruleName: Name;
   }
-  export type EbsGroup = string;
-  export type EbsGroupList = EbsGroup[];
-  export interface EbsSnapshotConfiguration {
-    /**
-     * The IDs of the Amazon Web Services accounts that have access to the Amazon EBS volume snapshot.   If the configuration is for an existing Amazon EBS volume snapshot and you do not specify the userIds, then the access preview uses the existing shared userIds for the snapshot.   If the access preview is for a new resource and you do not specify the userIds, then the access preview considers the snapshot without any userIds.   To propose deletion of existing shared accountIds, you can specify an empty list for userIds.  
-     */
-    userIds?: EbsUserIdList;
-    /**
-     * The groups that have access to the Amazon EBS volume snapshot. If the value all is specified, then the Amazon EBS volume snapshot is public.   If the configuration is for an existing Amazon EBS volume snapshot and you do not specify the groups, then the access preview uses the existing shared groups for the snapshot.   If the access preview is for a new resource and you do not specify the groups, then the access preview considers the snapshot without any groups.   To propose deletion of existing shared groups, you can specify an empty list for groups.  
-     */
-    groups?: EbsGroupList;
-    /**
-     * The KMS key identifier for an encrypted Amazon EBS volume snapshot. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key.   If the configuration is for an existing Amazon EBS volume snapshot and you do not specify the kmsKeyId, or you specify an empty string, then the access preview uses the existing kmsKeyId of the snapshot.   If the access preview is for a new resource and you do not specify the kmsKeyId, the access preview considers the snapshot as unencrypted.  
-     */
-    kmsKeyId?: EbsSnapshotDataEncryptionKeyId;
-  }
-  export type EbsSnapshotDataEncryptionKeyId = string;
-  export type EbsUserId = string;
-  export type EbsUserIdList = EbsUserId[];
-  export interface EcrRepositoryConfiguration {
-    /**
-     * The JSON repository policy text to apply to the Amazon ECR repository. For more information, see Private repository policy examples in the Amazon ECR User Guide.
-     */
-    repositoryPolicy?: EcrRepositoryPolicy;
-  }
-  export type EcrRepositoryPolicy = string;
-  export interface EfsFileSystemConfiguration {
-    /**
-     * The JSON policy definition to apply to the Amazon EFS file system. For more information on the elements that make up a file system policy, see Amazon EFS Resource-based policies.
-     */
-    fileSystemPolicy?: EfsFileSystemPolicy;
-  }
-  export type EfsFileSystemPolicy = string;
   export type FilterCriteriaMap = {[key: string]: Criterion};
   export interface Finding {
-    /**
-     * The ID of the finding.
-     */
-    id: FindingId;
-    /**
-     * The external principal that access to a resource within the zone of trust.
-     */
-    principal?: PrincipalMap;
     /**
      * The action in the analyzed policy statement that an external principal has permission to use.
      */
     action?: ActionList;
     /**
-     * The resource that an external principal has access to.
+     * The time at which the resource was analyzed.
      */
-    resource?: String;
-    /**
-     * Indicates whether the policy that generated the finding allows public access to the resource.
-     */
-    isPublic?: Boolean;
-    /**
-     * The type of the resource identified in the finding.
-     */
-    resourceType: ResourceType;
+    analyzedAt: Timestamp;
     /**
      * The condition in the analyzed policy statement that resulted in a finding.
      */
@@ -774,82 +701,78 @@ declare namespace AccessAnalyzer {
      */
     createdAt: Timestamp;
     /**
-     * The time at which the resource was analyzed.
+     * An error.
      */
-    analyzedAt: Timestamp;
+    error?: String;
     /**
-     * The time at which the finding was updated.
+     * The ID of the finding.
      */
-    updatedAt: Timestamp;
+    id: FindingId;
     /**
-     * The current status of the finding.
+     * Indicates whether the policy that generated the finding allows public access to the resource.
      */
-    status: FindingStatus;
+    isPublic?: Boolean;
+    /**
+     * The external principal that access to a resource within the zone of trust.
+     */
+    principal?: PrincipalMap;
+    /**
+     * The resource that an external principal has access to.
+     */
+    resource?: String;
     /**
      * The Amazon Web Services account ID that owns the resource.
      */
     resourceOwnerAccount: String;
     /**
-     * An error.
+     * The type of the resource identified in the finding.
      */
-    error?: String;
+    resourceType: ResourceType;
     /**
      * The sources of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings.
      */
     sources?: FindingSourceList;
+    /**
+     * The current status of the finding.
+     */
+    status: FindingStatus;
+    /**
+     * The time at which the finding was updated.
+     */
+    updatedAt: Timestamp;
   }
   export type FindingChangeType = "CHANGED"|"NEW"|"UNCHANGED"|string;
   export type FindingId = string;
   export type FindingIdList = FindingId[];
   export interface FindingSource {
     /**
-     * Indicates the type of access that generated the finding.
-     */
-    type: FindingSourceType;
-    /**
      * Includes details about how the access that generated the finding is granted. This is populated for Amazon S3 bucket findings.
      */
     detail?: FindingSourceDetail;
+    /**
+     * Indicates the type of access that generated the finding.
+     */
+    type: FindingSourceType;
   }
   export interface FindingSourceDetail {
     /**
      * The ARN of the access point that generated the finding. The ARN format depends on whether the ARN represents an access point or a multi-region access point.
      */
     accessPointArn?: String;
-    /**
-     * The account of the cross-account access point that generated the finding.
-     */
-    accessPointAccount?: String;
   }
   export type FindingSourceList = FindingSource[];
-  export type FindingSourceType = "POLICY"|"BUCKET_ACL"|"S3_ACCESS_POINT"|"S3_ACCESS_POINT_ACCOUNT"|string;
+  export type FindingSourceType = "POLICY"|"BUCKET_ACL"|"S3_ACCESS_POINT"|string;
   export type FindingStatus = "ACTIVE"|"ARCHIVED"|"RESOLVED"|string;
   export type FindingStatusUpdate = "ACTIVE"|"ARCHIVED"|string;
   export interface FindingSummary {
-    /**
-     * The ID of the finding.
-     */
-    id: FindingId;
-    /**
-     * The external principal that has access to a resource within the zone of trust.
-     */
-    principal?: PrincipalMap;
     /**
      * The action in the analyzed policy statement that an external principal has permission to use.
      */
     action?: ActionList;
     /**
-     * The resource that the external principal has access to.
+     * The time at which the resource-based policy that generated the finding was analyzed.
      */
-    resource?: String;
-    /**
-     * Indicates whether the finding reports a resource that has a policy that allows public access.
-     */
-    isPublic?: Boolean;
-    /**
-     * The type of the resource that the external principal has access to.
-     */
-    resourceType: ResourceType;
+    analyzedAt: Timestamp;
     /**
      * The condition in the analyzed policy statement that resulted in a finding.
      */
@@ -859,29 +782,45 @@ declare namespace AccessAnalyzer {
      */
     createdAt: Timestamp;
     /**
-     * The time at which the resource-based policy that generated the finding was analyzed.
+     * The error that resulted in an Error finding.
      */
-    analyzedAt: Timestamp;
+    error?: String;
     /**
-     * The time at which the finding was most recently updated.
+     * The ID of the finding.
      */
-    updatedAt: Timestamp;
+    id: FindingId;
     /**
-     * The status of the finding.
+     * Indicates whether the finding reports a resource that has a policy that allows public access.
      */
-    status: FindingStatus;
+    isPublic?: Boolean;
+    /**
+     * The external principal that has access to a resource within the zone of trust.
+     */
+    principal?: PrincipalMap;
+    /**
+     * The resource that the external principal has access to.
+     */
+    resource?: String;
     /**
      * The Amazon Web Services account ID that owns the resource.
      */
     resourceOwnerAccount: String;
     /**
-     * The error that resulted in an Error finding.
+     * The type of the resource that the external principal has access to.
      */
-    error?: String;
+    resourceType: ResourceType;
     /**
      * The sources of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings.
      */
     sources?: FindingSourceList;
+    /**
+     * The status of the finding.
+     */
+    status: FindingStatus;
+    /**
+     * The time at which the finding was most recently updated.
+     */
+    updatedAt: Timestamp;
   }
   export type FindingsList = FindingSummary[];
   export interface GeneratedPolicy {
@@ -893,6 +832,10 @@ declare namespace AccessAnalyzer {
   export type GeneratedPolicyList = GeneratedPolicy[];
   export interface GeneratedPolicyProperties {
     /**
+     * Lists details about the Trail used to generated policy.
+     */
+    cloudTrailProperties?: CloudTrailProperties;
+    /**
      * This value is set to true if the generated policy contains all possible actions for a service that IAM Access Analyzer identified from the CloudTrail trail that you specified, and false otherwise.
      */
     isComplete?: Boolean;
@@ -900,20 +843,16 @@ declare namespace AccessAnalyzer {
      * The ARN of the IAM entity (user or role) for which you are generating a policy.
      */
     principalArn: PrincipalArn;
-    /**
-     * Lists details about the Trail used to generated policy.
-     */
-    cloudTrailProperties?: CloudTrailProperties;
   }
   export interface GeneratedPolicyResult {
-    /**
-     * A GeneratedPolicyProperties object that contains properties of the generated policy.
-     */
-    properties: GeneratedPolicyProperties;
     /**
      * The text to use as the content for the new policy. The policy is created using the CreatePolicy action.
      */
     generatedPolicies?: GeneratedPolicyList;
+    /**
+     * A GeneratedPolicyProperties object that contains properties of the generated policy.
+     */
+    properties: GeneratedPolicyProperties;
   }
   export interface GetAccessPreviewRequest {
     /**
@@ -990,10 +929,6 @@ declare namespace AccessAnalyzer {
   }
   export interface GetGeneratedPolicyRequest {
     /**
-     * The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request.
-     */
-    jobId: JobId;
-    /**
      * The level of detail that you want to generate. You can specify whether to generate policies with placeholders for resource ARNs for actions that support resource level granularity in policies. For example, in the resource section of a policy, you can receive a placeholder such as "Resource":"arn:aws:s3:::${BucketName}" instead of "*".
      */
     includeResourcePlaceholders?: Boolean;
@@ -1001,16 +936,20 @@ declare namespace AccessAnalyzer {
      * The level of detail that you want to generate. You can specify whether to generate service-level policies.  IAM Access Analyzer uses iam:servicelastaccessed to identify services that have been used recently to create this service-level template.
      */
     includeServiceLevelTemplate?: Boolean;
+    /**
+     * The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request.
+     */
+    jobId: JobId;
   }
   export interface GetGeneratedPolicyResponse {
-    /**
-     * A GeneratedPolicyDetails object that contains details about the generated policy.
-     */
-    jobDetails: JobDetails;
     /**
      * A GeneratedPolicyResult object that contains the generated policies and associated details.
      */
     generatedPolicyResult: GeneratedPolicyResult;
+    /**
+     * A GeneratedPolicyDetails object that contains details about the generated policy.
+     */
+    jobDetails: JobDetails;
   }
   export type GranteePrincipal = string;
   export interface IamRoleConfiguration {
@@ -1022,13 +961,13 @@ declare namespace AccessAnalyzer {
   export type IamTrustPolicy = string;
   export interface InlineArchiveRule {
     /**
-     * The name of the rule.
-     */
-    ruleName: Name;
-    /**
      * The condition and values for a criterion.
      */
     filter: FilterCriteriaMap;
+    /**
+     * The name of the rule.
+     */
+    ruleName: Name;
   }
   export type InlineArchiveRulesList = InlineArchiveRule[];
   export type Integer = number;
@@ -1038,18 +977,6 @@ declare namespace AccessAnalyzer {
   export type IssuingAccount = string;
   export interface JobDetails {
     /**
-     * The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request.
-     */
-    jobId: JobId;
-    /**
-     * The status of the job request.
-     */
-    status: JobStatus;
-    /**
-     * A timestamp of when the job was started.
-     */
-    startedOn: Timestamp;
-    /**
      * A timestamp of when the job was completed.
      */
     completedOn?: Timestamp;
@@ -1057,6 +984,18 @@ declare namespace AccessAnalyzer {
      * The job error for the policy generation request.
      */
     jobError?: JobError;
+    /**
+     * The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request.
+     */
+    jobId: JobId;
+    /**
+     * A timestamp of when the job was started.
+     */
+    startedOn: Timestamp;
+    /**
+     * The status of the job request.
+     */
+    status: JobStatus;
   }
   export interface JobError {
     /**
@@ -1076,25 +1015,25 @@ declare namespace AccessAnalyzer {
   export type KmsConstraintsValue = string;
   export interface KmsGrantConfiguration {
     /**
-     * A list of operations that the grant permits.
+     * Use this structure to propose allowing cryptographic operations in the grant only when the operation request includes the specified encryption context.
      */
-    operations: KmsGrantOperationsList;
+    constraints?: KmsGrantConstraints;
     /**
      * The principal that is given permission to perform the operations that the grant permits.
      */
     granteePrincipal: GranteePrincipal;
     /**
-     * The principal that is given permission to retire the grant by using RetireGrant operation.
-     */
-    retiringPrincipal?: RetiringPrincipal;
-    /**
-     * Use this structure to propose allowing cryptographic operations in the grant only when the operation request includes the specified encryption context.
-     */
-    constraints?: KmsGrantConstraints;
-    /**
      *  The Amazon Web Services account under which the grant was issued. The account is used to propose KMS grants issued by accounts other than the owner of the key.
      */
     issuingAccount: IssuingAccount;
+    /**
+     * A list of operations that the grant permits.
+     */
+    operations: KmsGrantOperationsList;
+    /**
+     * The principal that is given permission to retire the grant by using RetireGrant operation.
+     */
+    retiringPrincipal?: RetiringPrincipal;
   }
   export type KmsGrantConfigurationsList = KmsGrantConfiguration[];
   export interface KmsGrantConstraints {
@@ -1111,13 +1050,13 @@ declare namespace AccessAnalyzer {
   export type KmsGrantOperationsList = KmsGrantOperation[];
   export interface KmsKeyConfiguration {
     /**
-     * Resource policy configuration for the KMS key. The only valid value for the name of the key policy is default. For more information, see Default key policy.
-     */
-    keyPolicies?: KmsKeyPoliciesMap;
-    /**
      * A list of proposed grant configurations for the KMS key. If the proposed grant configuration is for an existing key, the access preview uses the proposed list of grant configurations in place of the existing grants. Otherwise, the access preview uses the existing grants for the key.
      */
     grants?: KmsGrantConfigurationsList;
+    /**
+     * Resource policy configuration for the KMS key. The only valid value for the name of the key policy is default. For more information, see Default key policy.
+     */
+    keyPolicies?: KmsKeyPoliciesMap;
   }
   export type KmsKeyPoliciesMap = {[key: string]: KmsKeyPolicy};
   export type KmsKeyPolicy = string;
@@ -1136,13 +1075,13 @@ declare namespace AccessAnalyzer {
      */
     filter?: FilterCriteriaMap;
     /**
-     * A token used for pagination of results returned.
-     */
-    nextToken?: Token;
-    /**
      * The maximum number of results to return in the response.
      */
     maxResults?: Integer;
+    /**
+     * A token used for pagination of results returned.
+     */
+    nextToken?: Token;
   }
   export interface ListAccessPreviewFindingsResponse {
     /**
@@ -1160,13 +1099,13 @@ declare namespace AccessAnalyzer {
      */
     analyzerArn: AnalyzerArn;
     /**
-     * A token used for pagination of results returned.
-     */
-    nextToken?: Token;
-    /**
      * The maximum number of results to return in the response.
      */
     maxResults?: Integer;
+    /**
+     * A token used for pagination of results returned.
+     */
+    nextToken?: Token;
   }
   export interface ListAccessPreviewsResponse {
     /**
@@ -1184,17 +1123,17 @@ declare namespace AccessAnalyzer {
      */
     analyzerArn: AnalyzerArn;
     /**
-     * The type of resource.
+     * The maximum number of results to return in the response.
      */
-    resourceType?: ResourceType;
+    maxResults?: Integer;
     /**
      * A token used for pagination of results returned.
      */
     nextToken?: Token;
     /**
-     * The maximum number of results to return in the response.
+     * The type of resource.
      */
-    maxResults?: Integer;
+    resourceType?: ResourceType;
   }
   export interface ListAnalyzedResourcesResponse {
     /**
@@ -1208,13 +1147,13 @@ declare namespace AccessAnalyzer {
   }
   export interface ListAnalyzersRequest {
     /**
-     * A token used for pagination of results returned.
-     */
-    nextToken?: Token;
-    /**
      * The maximum number of results to return in the response.
      */
     maxResults?: Integer;
+    /**
+     * A token used for pagination of results returned.
+     */
+    nextToken?: Token;
     /**
      * The type of analyzer.
      */
@@ -1236,13 +1175,13 @@ declare namespace AccessAnalyzer {
      */
     analyzerName: Name;
     /**
-     * A token used for pagination of results returned.
-     */
-    nextToken?: Token;
-    /**
      * The maximum number of results to return in the request.
      */
     maxResults?: Integer;
+    /**
+     * A token used for pagination of results returned.
+     */
+    nextToken?: Token;
   }
   export interface ListArchiveRulesResponse {
     /**
@@ -1264,17 +1203,17 @@ declare namespace AccessAnalyzer {
      */
     filter?: FilterCriteriaMap;
     /**
-     * The sort order for the findings returned.
+     * The maximum number of results to return in the response.
      */
-    sort?: SortCriteria;
+    maxResults?: Integer;
     /**
      * A token used for pagination of results returned.
      */
     nextToken?: Token;
     /**
-     * The maximum number of results to return in the response.
+     * The sort order for the findings returned.
      */
-    maxResults?: Integer;
+    sort?: SortCriteria;
   }
   export interface ListFindingsResponse {
     /**
@@ -1288,10 +1227,6 @@ declare namespace AccessAnalyzer {
   }
   export interface ListPolicyGenerationsRequest {
     /**
-     * The ARN of the IAM entity (user or role) for which you are generating a policy. Use this with ListGeneratedPolicies to filter the results to only include results for a specific principal.
-     */
-    principalArn?: PrincipalArn;
-    /**
      * The maximum number of results to return in the response.
      */
     maxResults?: ListPolicyGenerationsRequestMaxResultsInteger;
@@ -1299,17 +1234,21 @@ declare namespace AccessAnalyzer {
      * A token used for pagination of results returned.
      */
     nextToken?: Token;
+    /**
+     * The ARN of the IAM entity (user or role) for which you are generating a policy. Use this with ListGeneratedPolicies to filter the results to only include results for a specific principal.
+     */
+    principalArn?: PrincipalArn;
   }
   export type ListPolicyGenerationsRequestMaxResultsInteger = number;
   export interface ListPolicyGenerationsResponse {
     /**
-     * A PolicyGeneration object that contains details about the generated policy.
-     */
-    policyGenerations: PolicyGenerationList;
-    /**
      * A token used for pagination of results returned.
      */
     nextToken?: Token;
+    /**
+     * A PolicyGeneration object that contains details about the generated policy.
+     */
+    policyGenerations: PolicyGenerationList;
   }
   export interface ListTagsForResourceRequest {
     /**
@@ -1337,11 +1276,11 @@ declare namespace AccessAnalyzer {
   export type LocationList = Location[];
   export type Name = string;
   export interface NetworkOriginConfiguration {
-    vpcConfiguration?: VpcConfiguration;
     /**
      * The configuration for the Amazon S3 access point or multi-region access point with an Internet origin.
      */
     internetConfiguration?: InternetConfiguration;
+    vpcConfiguration?: VpcConfiguration;
   }
   export type OrderBy = "ASC"|"DESC"|string;
   export interface PathElement {
@@ -1366,6 +1305,10 @@ declare namespace AccessAnalyzer {
   export type PolicyDocument = string;
   export interface PolicyGeneration {
     /**
+     * A timestamp of when the policy generation was completed.
+     */
+    completedOn?: Timestamp;
+    /**
      * The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request.
      */
     jobId: JobId;
@@ -1374,17 +1317,13 @@ declare namespace AccessAnalyzer {
      */
     principalArn: PrincipalArn;
     /**
-     * The status of the policy generation request.
-     */
-    status: JobStatus;
-    /**
      * A timestamp of when the policy generation started.
      */
     startedOn: Timestamp;
     /**
-     * A timestamp of when the policy generation was completed.
+     * The status of the policy generation request.
      */
-    completedOn?: Timestamp;
+    status: JobStatus;
   }
   export interface PolicyGenerationDetails {
     /**
@@ -1397,13 +1336,13 @@ declare namespace AccessAnalyzer {
   export type PolicyType = "IDENTITY_POLICY"|"RESOURCE_POLICY"|"SERVICE_CONTROL_POLICY"|string;
   export interface Position {
     /**
-     * The line of the position, starting from 1.
-     */
-    line: Integer;
-    /**
      * The column of the position, starting from 0.
      */
     column: Integer;
+    /**
+     * The line of the position, starting from 1.
+     */
+    line: Integer;
     /**
      * The offset within the policy that corresponds to the position, starting from 0.
      */
@@ -1411,52 +1350,10 @@ declare namespace AccessAnalyzer {
   }
   export type PrincipalArn = string;
   export type PrincipalMap = {[key: string]: String};
-  export type RdsDbClusterSnapshotAccountId = string;
-  export type RdsDbClusterSnapshotAccountIdsList = RdsDbClusterSnapshotAccountId[];
-  export type RdsDbClusterSnapshotAttributeName = string;
-  export interface RdsDbClusterSnapshotAttributeValue {
-    /**
-     * The Amazon Web Services account IDs that have access to the manual Amazon RDS DB cluster snapshot. If the value all is specified, then the Amazon RDS DB cluster snapshot is public and can be copied or restored by all Amazon Web Services accounts.   If the configuration is for an existing Amazon RDS DB cluster snapshot and you do not specify the accountIds in RdsDbClusterSnapshotAttributeValue, then the access preview uses the existing shared accountIds for the snapshot.   If the access preview is for a new resource and you do not specify the specify the accountIds in RdsDbClusterSnapshotAttributeValue, then the access preview considers the snapshot without any attributes.   To propose deletion of existing shared accountIds, you can specify an empty list for accountIds in the RdsDbClusterSnapshotAttributeValue.  
-     */
-    accountIds?: RdsDbClusterSnapshotAccountIdsList;
-  }
-  export type RdsDbClusterSnapshotAttributesMap = {[key: string]: RdsDbClusterSnapshotAttributeValue};
-  export interface RdsDbClusterSnapshotConfiguration {
-    /**
-     * The names and values of manual DB cluster snapshot attributes. Manual DB cluster snapshot attributes are used to authorize other Amazon Web Services accounts to restore a manual DB cluster snapshot. The only valid value for AttributeName for the attribute map is restore 
-     */
-    attributes?: RdsDbClusterSnapshotAttributesMap;
-    /**
-     * The KMS key identifier for an encrypted Amazon RDS DB cluster snapshot. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key.   If the configuration is for an existing Amazon RDS DB cluster snapshot and you do not specify the kmsKeyId, or you specify an empty string, then the access preview uses the existing kmsKeyId of the snapshot.   If the access preview is for a new resource and you do not specify the specify the kmsKeyId, then the access preview considers the snapshot as unencrypted.  
-     */
-    kmsKeyId?: RdsDbClusterSnapshotKmsKeyId;
-  }
-  export type RdsDbClusterSnapshotKmsKeyId = string;
-  export type RdsDbSnapshotAccountId = string;
-  export type RdsDbSnapshotAccountIdsList = RdsDbSnapshotAccountId[];
-  export type RdsDbSnapshotAttributeName = string;
-  export interface RdsDbSnapshotAttributeValue {
-    /**
-     * The Amazon Web Services account IDs that have access to the manual Amazon RDS DB snapshot. If the value all is specified, then the Amazon RDS DB snapshot is public and can be copied or restored by all Amazon Web Services accounts.   If the configuration is for an existing Amazon RDS DB snapshot and you do not specify the accountIds in RdsDbSnapshotAttributeValue, then the access preview uses the existing shared accountIds for the snapshot.   If the access preview is for a new resource and you do not specify the specify the accountIds in RdsDbSnapshotAttributeValue, then the access preview considers the snapshot without any attributes.   To propose deletion of an existing shared accountIds, you can specify an empty list for accountIds in the RdsDbSnapshotAttributeValue.  
-     */
-    accountIds?: RdsDbSnapshotAccountIdsList;
-  }
-  export type RdsDbSnapshotAttributesMap = {[key: string]: RdsDbSnapshotAttributeValue};
-  export interface RdsDbSnapshotConfiguration {
-    /**
-     * The names and values of manual DB snapshot attributes. Manual DB snapshot attributes are used to authorize other Amazon Web Services accounts to restore a manual DB snapshot. The only valid value for attributeName for the attribute map is restore.
-     */
-    attributes?: RdsDbSnapshotAttributesMap;
-    /**
-     * The KMS key identifier for an encrypted Amazon RDS DB snapshot. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key.   If the configuration is for an existing Amazon RDS DB snapshot and you do not specify the kmsKeyId, or you specify an empty string, then the access preview uses the existing kmsKeyId of the snapshot.   If the access preview is for a new resource and you do not specify the specify the kmsKeyId, then the access preview considers the snapshot as unencrypted.  
-     */
-    kmsKeyId?: RdsDbSnapshotKmsKeyId;
-  }
-  export type RdsDbSnapshotKmsKeyId = string;
   export type ReasonCode = "AWS_SERVICE_ACCESS_DISABLED"|"DELEGATED_ADMINISTRATOR_DEREGISTERED"|"ORGANIZATION_DELETED"|"SERVICE_LINKED_ROLE_CREATION_FAILED"|string;
   export type RegionList = String[];
   export type ResourceArn = string;
-  export type ResourceType = "AWS::S3::Bucket"|"AWS::IAM::Role"|"AWS::SQS::Queue"|"AWS::Lambda::Function"|"AWS::Lambda::LayerVersion"|"AWS::KMS::Key"|"AWS::SecretsManager::Secret"|"AWS::EFS::FileSystem"|"AWS::EC2::Snapshot"|"AWS::ECR::Repository"|"AWS::RDS::DBSnapshot"|"AWS::RDS::DBClusterSnapshot"|"AWS::SNS::Topic"|string;
+  export type ResourceType = "AWS::S3::Bucket"|"AWS::IAM::Role"|"AWS::SQS::Queue"|"AWS::Lambda::Function"|"AWS::Lambda::LayerVersion"|"AWS::KMS::Key"|"AWS::SecretsManager::Secret"|string;
   export type RetiringPrincipal = string;
   export type RoleArn = string;
   export interface S3AccessPointConfiguration {
@@ -1465,43 +1362,43 @@ declare namespace AccessAnalyzer {
      */
     accessPointPolicy?: AccessPointPolicy;
     /**
-     * The proposed S3PublicAccessBlock configuration to apply to this Amazon S3 access point or multi-region access point.
-     */
-    publicAccessBlock?: S3PublicAccessBlockConfiguration;
-    /**
      * The proposed Internet and VpcConfiguration to apply to this Amazon S3 access point. VpcConfiguration does not apply to multi-region access points. If the access preview is for a new resource and neither is specified, the access preview uses Internet for the network origin. If the access preview is for an existing resource and neither is specified, the access preview uses the exiting network origin.
      */
     networkOrigin?: NetworkOriginConfiguration;
+    /**
+     * The proposed S3PublicAccessBlock configuration to apply to this Amazon S3 access point or multi-region access point.
+     */
+    publicAccessBlock?: S3PublicAccessBlockConfiguration;
   }
   export type S3AccessPointConfigurationsMap = {[key: string]: S3AccessPointConfiguration};
   export interface S3BucketAclGrantConfiguration {
     /**
-     * The permissions being granted.
-     */
-    permission: AclPermission;
-    /**
      * The grantee to whom you’re assigning access rights.
      */
     grantee: AclGrantee;
+    /**
+     * The permissions being granted.
+     */
+    permission: AclPermission;
   }
   export type S3BucketAclGrantConfigurationsList = S3BucketAclGrantConfiguration[];
   export interface S3BucketConfiguration {
     /**
-     * The proposed bucket policy for the Amazon S3 bucket.
+     * The configuration of Amazon S3 access points or multi-region access points for the bucket. You can propose up to 10 new access points per bucket.
      */
-    bucketPolicy?: S3BucketPolicy;
+    accessPoints?: S3AccessPointConfigurationsMap;
     /**
      * The proposed list of ACL grants for the Amazon S3 bucket. You can propose up to 100 ACL grants per bucket. If the proposed grant configuration is for an existing bucket, the access preview uses the proposed list of grant configurations in place of the existing grants. Otherwise, the access preview uses the existing grants for the bucket.
      */
     bucketAclGrants?: S3BucketAclGrantConfigurationsList;
     /**
+     * The proposed bucket policy for the Amazon S3 bucket.
+     */
+    bucketPolicy?: S3BucketPolicy;
+    /**
      * The proposed block public access configuration for the Amazon S3 bucket.
      */
     bucketPublicAccessBlock?: S3PublicAccessBlockConfiguration;
-    /**
-     * The configuration of Amazon S3 access points or multi-region access points for the bucket. You can propose up to 10 new access points per bucket.
-     */
-    accessPoints?: S3AccessPointConfigurationsMap;
   }
   export type S3BucketPolicy = string;
   export interface S3PublicAccessBlockConfiguration {
@@ -1527,13 +1424,6 @@ declare namespace AccessAnalyzer {
   export type SecretsManagerSecretKmsId = string;
   export type SecretsManagerSecretPolicy = string;
   export type SharedViaList = String[];
-  export interface SnsTopicConfiguration {
-    /**
-     * The JSON policy text that defines who can access an Amazon SNS topic. For more information, see Example cases for Amazon SNS access control in the Amazon SNS Developer Guide.
-     */
-    topicPolicy?: SnsTopicPolicy;
-  }
-  export type SnsTopicPolicy = string;
   export interface SortCriteria {
     /**
      * The name of the attribute to sort on.
@@ -1546,13 +1436,13 @@ declare namespace AccessAnalyzer {
   }
   export interface Span {
     /**
-     * The start position of the span (inclusive).
-     */
-    start: Position;
-    /**
      * The end position of the span (exclusive).
      */
     end: Position;
+    /**
+     * The start position of the span (inclusive).
+     */
+    start: Position;
   }
   export interface SqsQueueConfiguration {
     /**
@@ -1563,17 +1453,17 @@ declare namespace AccessAnalyzer {
   export type SqsQueuePolicy = string;
   export interface StartPolicyGenerationRequest {
     /**
-     * Contains the ARN of the IAM entity (user or role) for which you are generating a policy.
+     * A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, the subsequent retries with the same client token return the result from the original successful request and they have no additional effect. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK.
      */
-    policyGenerationDetails: PolicyGenerationDetails;
+    clientToken?: String;
     /**
      * A CloudTrailDetails object that contains details about a Trail that you want to analyze to generate policies.
      */
     cloudTrailDetails?: CloudTrailDetails;
     /**
-     * A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, the subsequent retries with the same client token return the result from the original successful request and they have no additional effect. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK.
+     * Contains the ARN of the IAM entity (user or role) for which you are generating a policy.
      */
-    clientToken?: String;
+    policyGenerationDetails: PolicyGenerationDetails;
   }
   export interface StartPolicyGenerationResponse {
     /**
@@ -1590,10 +1480,6 @@ declare namespace AccessAnalyzer {
      * The ARN of the resource to scan.
      */
     resourceArn: ResourceArn;
-    /**
-     * The Amazon Web Services account ID that owns the resource. For most Amazon Web Services resources, the owning account is the account in which the resource was created.
-     */
-    resourceOwnerAccount?: String;
   }
   export interface StatusReason {
     /**
@@ -1604,13 +1490,13 @@ declare namespace AccessAnalyzer {
   export type String = string;
   export interface Substring {
     /**
-     * The start index of the substring, starting from 0.
-     */
-    start: Integer;
-    /**
      * The length of the substring.
      */
     length: Integer;
+    /**
+     * The start index of the substring, starting from 0.
+     */
+    start: Integer;
   }
   export type TagKeys = String[];
   export interface TagResourceRequest {
@@ -1630,6 +1516,10 @@ declare namespace AccessAnalyzer {
   export type Token = string;
   export interface Trail {
     /**
+     * Possible values are true or false. If set to true, IAM Access Analyzer retrieves CloudTrail data from all regions to analyze and generate a policy.
+     */
+    allRegions?: Boolean;
+    /**
      * Specifies the ARN of the trail. The format of a trail ARN is arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail.
      */
     cloudTrailArn: CloudTrailArn;
@@ -1637,14 +1527,14 @@ declare namespace AccessAnalyzer {
      * A list of regions to get CloudTrail data from and analyze to generate a policy.
      */
     regions?: RegionList;
-    /**
-     * Possible values are true or false. If set to true, IAM Access Analyzer retrieves CloudTrail data from all regions to analyze and generate a policy.
-     */
-    allRegions?: Boolean;
   }
   export type TrailList = Trail[];
   export interface TrailProperties {
     /**
+     * Possible values are true or false. If set to true, IAM Access Analyzer retrieves CloudTrail data from all regions to analyze and generate a policy.
+     */
+    allRegions?: Boolean;
+    /**
      * Specifies the ARN of the trail. The format of a trail ARN is arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail.
      */
     cloudTrailArn: CloudTrailArn;
@@ -1652,10 +1542,6 @@ declare namespace AccessAnalyzer {
      * A list of regions to get CloudTrail data from and analyze to generate a policy.
      */
     regions?: RegionList;
-    /**
-     * Possible values are true or false. If set to true, IAM Access Analyzer retrieves CloudTrail data from all regions to analyze and generate a policy.
-     */
-    allRegions?: Boolean;
   }
   export type TrailPropertiesList = TrailProperties[];
   export type Type = "ACCOUNT"|"ORGANIZATION"|string;
@@ -1677,17 +1563,17 @@ declare namespace AccessAnalyzer {
      */
     analyzerName: Name;
     /**
-     * The name of the rule to update.
+     * A client token.
      */
-    ruleName: Name;
+    clientToken?: String;
     /**
      * A filter to match for the rules to update. Only rules that match the filter are updated.
      */
     filter: FilterCriteriaMap;
     /**
-     * A client token.
+     * The name of the rule to update.
      */
-    clientToken?: String;
+    ruleName: Name;
   }
   export interface UpdateFindingsRequest {
     /**
@@ -1695,9 +1581,9 @@ declare namespace AccessAnalyzer {
      */
     analyzerArn: AnalyzerArn;
     /**
-     * The state represents the action to take to update the finding Status. Use ARCHIVE to change an Active finding to an Archived finding. Use ACTIVE to change an Archived finding to an Active finding.
+     * A client token.
      */
-    status: FindingStatusUpdate;
+    clientToken?: String;
     /**
      * The IDs of the findings to update.
      */
@@ -1707,9 +1593,9 @@ declare namespace AccessAnalyzer {
      */
     resourceArn?: ResourceArn;
     /**
-     * A client token.
+     * The state represents the action to take to update the finding Status. Use ARCHIVE to change an Active finding to an Archived finding. Use ACTIVE to change an Archived finding to an Active finding.
      */
-    clientToken?: String;
+    status: FindingStatusUpdate;
   }
   export interface ValidatePolicyFinding {
     /**
@@ -1761,7 +1647,7 @@ declare namespace AccessAnalyzer {
      */
     validatePolicyResourceType?: ValidatePolicyResourceType;
   }
-  export type ValidatePolicyResourceType = "AWS::S3::Bucket"|"AWS::S3::AccessPoint"|"AWS::S3::MultiRegionAccessPoint"|"AWS::S3ObjectLambda::AccessPoint"|"AWS::IAM::AssumeRolePolicyDocument"|string;
+  export type ValidatePolicyResourceType = "AWS::S3::Bucket"|"AWS::S3::AccessPoint"|"AWS::S3::MultiRegionAccessPoint"|"AWS::S3ObjectLambda::AccessPoint"|string;
   export interface ValidatePolicyResponse {
     /**
      * The list of findings in a policy returned by IAM Access Analyzer based on its suite of policy checks.
