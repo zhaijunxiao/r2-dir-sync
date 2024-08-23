@@ -64,20 +64,19 @@ try {
             if (s3ETag === localFileMD5) {
                 console.log(`Skipping upload for ${bucketPath}: File is unchanged.`);
             } else {
-                console.log(`Successfully uploaded ${bucketPath} to ${bucketName}`);
-                // let params = {
-                //     Bucket: bucketName,
-                //     Key: bucketPath,
-                //     Body: fs.readFileSync(filePath),
-                //     ContentType: mime.getType(filePath)
-                // };
-                // s3.putObject(params, function(err, data) {
-                //     if (err) {
-                //         console.log(err);
-                //     } else {
-                //         console.log(`Successfully uploaded ${bucketPath} to ${bucketName}`);
-                //     }
-                // });
+                let params = {
+                    Bucket: bucketName,
+                    Key: bucketPath,
+                    Body: fs.readFileSync(filePath),
+                    ContentType: mime.getType(filePath)
+                };
+                s3.putObject(params, function(err, data) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(`Successfully uploaded ${bucketPath} to ${bucketName}`);
+                    }
+                });
             }
         });
     };
