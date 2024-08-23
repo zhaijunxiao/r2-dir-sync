@@ -23,6 +23,11 @@ inputs:
     description: "R2 end path (defaults to the name of the directory)"
     required: false
     default: ""
+  filenamePattern:
+    description: "File name pattern to match"
+    required: false
+    default: ".*"
+  
 runs:
   using: "node16"
   main: "index.js"

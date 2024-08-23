@@ -12,13 +12,14 @@ try {
     const bucket = core.getInput('bucket');
     const source = core.getInput('source');
     const destination = core.getInput('destination');
+    const filenamePattern = core.getInput('filenamePattern');
 
     const uploadDir = function(s3Path, bucketName) {
 
         var s3 = new aws.S3({
                 accessKeyId: accesskeyid,
                 secretAccessKey: secretaccesskey,
-                endpoint: accountid + ".r2.cloudflarestorage.com/" + destination,
+                endpoint: accountid + ".r2.cloudflarestorage.com"
         });
 
         function walkSync(currentDirPath, callback) {
@@ -57,10 +58,16 @@ try {
         }
 
         walkSync(s3Path, async function(filePath, stat) {
+
+            let fileName = path.basename(filePath);
+            if (!new RegExp(filenamePattern).test(fileName)) {
+                console.log(`Skipping upload for ${filePath}: Filename does not match pattern.`);
+                return;
+            }
+
             let bucketPath = path.join(destination, filePath.substring(s3Path.length + 1));
             let localFileMD5 = await getLocalFileMD5(filePath);
             let s3ETag = await getS3ETag(bucketName, bucketPath);
-
             if (s3ETag === localFileMD5) {
                 console.log(`Skipping upload for ${bucketPath}: File is unchanged.`);
             } else {

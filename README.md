@@ -36,5 +36,6 @@ Github action to upload static directory of files to Cloudflare R2
     secretaccesskey: ${{ secrets.CF_SECRET_KEY }}
     bucket: ${{ secrets.R2_BUCKET }}
     source: ${{ github.workspace }}/static
-    destination: /
+    destination: dir
+    filenamePattern: .*
 ```
