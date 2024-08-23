@@ -3,6 +3,7 @@ const core = require('@actions/core');
 var path = require("path");
 var fs = require('fs');
 var mime = require('mime');
+var crypto = require('crypto');
 
 try {
     const accountid = core.getInput('accountid');
@@ -33,17 +34,51 @@ try {
             });
         }
 
-        walkSync(s3Path, function(filePath, stat) {
-            let bucketPath = filePath.substring(s3Path.length+1);
-            let params = {Bucket: bucketName, Key: bucketPath, Body: fs.readFileSync(filePath), ContentType: mime.getType(filePath) };
-            s3.putObject(params, function(err, data) {
-                if (err) {
-                    console.log(err)
-                } else {
-                    console.log('Successfully uploaded '+ bucketPath +' to ' + bucketName);
-                }
+        function getLocalFileMD5(filePath) {
+            return new Promise((resolve, reject) => {
+                const hash = crypto.createHash('md5');
+                const stream = fs.createReadStream(filePath);
+
+                stream.on('data', (data) => hash.update(data));
+                stream.on('end', () => resolve(hash.digest('hex')));
+                stream.on('error', (err) => reject(err));
             });
-            s3.
+        }
+
+        function getS3ETag(bucketName, key) {
+            return s3.headObject({ Bucket: bucketName, Key: key }).promise()
+                .then(data => data.ETag.replace(/"/g, ''))
+                .catch(err => {
+                    if (err.code === 'NotFound') {
+                        return null;
+                    }
+                    throw err;
+                });
+        }
+
+        walkSync(s3Path, async function(filePath, stat) {
+            let bucketPath = path.join(destination, filePath.substring(s3Path.length + 1));
+            let localFileMD5 = await getLocalFileMD5(filePath);
+            let s3ETag = await getS3ETag(bucketName, bucketPath);
+
+            if (s3ETag === localFileMD5) {
+                console.log(`Skipping upload for ${bucketPath}: File is unchanged.`);
+            } else {
+                console.log(`Successfully uploaded ${bucketPath} to ${bucketName}`);
+                // let params = {
+                //     Bucket: bucketName,
+                //     Key: bucketPath,
+                //     Body: fs.readFileSync(filePath),
+                //     ContentType: mime.getType(filePath)
+                // };
+                // s3.putObject(params, function(err, data) {
+                //     if (err) {
+                //         console.log(err);
+                //     } else {
+                //         console.log(`Successfully uploaded ${bucketPath} to ${bucketName}`);
+                //     }
+                // });
+            }
         });
     };
     
