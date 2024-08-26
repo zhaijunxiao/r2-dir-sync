@@ -1,6 +1,8 @@
 # r2-dir-upload
 Github action to upload static directory of files to Cloudflare R2
 
+Before uploading, it will first check whether it is consistent with the local file. If there is no corresponding file in R2, or the file is inconsistent, it will be updated.
+
 ## Inputs
 
 ### `accountid`
@@ -25,6 +27,11 @@ Github action to upload static directory of files to Cloudflare R2
 ### `destination`
 
 **Optional** Destination path of the directory. Defaults to the root of the bucket.
+
+### `filenamePattern`
+
+**Optional** Filter sent files using regular expressions
+
 
 ## Example usage
 ```yaml
