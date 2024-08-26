@@ -36,7 +36,7 @@ Before uploading, it will first check whether it is consistent with the local fi
 ## Example usage
 ```yaml
 - name: R2 Directory Sync
-  uses: zhaijunxiao/r2-dir-sync@v0.0.2
+  uses: zhaijunxiao/r2-dir-sync@v1.0.1
   with:
     accountid: ${{ secrets.CF_ACCOUNT_ID }}
     accesskeyid: ${{ secrets.CF_ACCESS_KEY }}
